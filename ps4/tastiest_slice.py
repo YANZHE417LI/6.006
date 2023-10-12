@@ -3,9 +3,12 @@ from Set_AVL_Tree import BST_Node, Set_AVL_Tree
 # DO NOT REMOVE THIS IMPORT STATEMENT #
 # DO NOT MODIFY IMPORTED CODE         #
 #######################################
-def prefix_sum(A):
-       if A: return A.prefix_sum
+def sum(A):
+       if A: return A.sum
        else: return 0 
+def max_prefix(A):
+       if A:return A.max_prefix
+       else: return 0
 class Key_Val_Item:
     def __init__(self, key, val):
         self.key = key
@@ -21,10 +24,14 @@ class Part_B_Node(BST_Node):
         #########################################
         # ADD ANY NEW SUBTREE AUGMENTATION HERE #
         #########################################
-        A.prefixsum=prefix_sum(A.left)+A.item.val
-        if A.right:# aug left->root->right
-            A.right.prefixsum=A.prefixsum+A.right.item.val
-        #find prev in avl tree ?? how to compare key of coordinate #use conclusion from question 1
+        A.sum=sum(A.left)+A.item.val+sum(A.right)
+        A.max_prefix=max(sum(A.left),sum(A.left)+A.item.val,sum(A.left)+A.item.val+max_prefix(A.right))
+        if A.max_prefix==sum(A.left):
+            max_prefix_key=A.left.item.key
+        elif A.max_prefix==sum(A.left)+A.item.val:
+            max_prefix_key=A.item.key
+        else: max_prefix_key=A.right.item.key
+        if max_prefix_key: A.max_prefix_key=max_prefix_key
 class Part_B_Tree(Set_AVL_Tree):
     def __init__(self): 
         super().__init__(Part_B_Node)
@@ -36,15 +43,8 @@ class Part_B_Tree(Set_AVL_Tree):
         k, s = 0, 0
         ##################
         # YOUR CODE HERE #
-        ##################
-        cur_node=self.root
-        while cur_node:
-            Part_B_Node.subtree_update(cur_node)
-            if cur_node.prefixsum>s:
-                s=cur_node.prefixsum
-                k=cur_node.key
-        return (k, s)
-
+        ################## 
+        return (self.root.max_prefix_key, self.root.max_prefix)
 def tastiest_slice(toppings):
     '''
     Input:  toppings | List of integer tuples (x,y,t) representing 
@@ -58,8 +58,7 @@ def tastiest_slice(toppings):
     # YOUR CODE HERE #
     ##################
     #define cmp for coordinate 
-    for top in toppings:
-        item=Key_Val_Item((top[0],top[1]),top[2])
-        B.insert(item)
-    k,s=B.max_prefix()
-    return (k[0], k[1], s)
+    sorted_topping=sorted(toppings,key=lambda topping:topping[0]) #sort by x
+    for topping in sorted_topping:
+        B.insert(Key_Val_Item(topping[0],topping[1]))
+    return B.max_prefix()
